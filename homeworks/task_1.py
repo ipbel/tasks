@@ -93,6 +93,12 @@ def unpack_4_4(value: int) -> int:
 def clamp(value: float, low: float, high: float) -> float:
     if low <= value <= high:
         return value
+    else:
+        if value < low:
+            return low
+        if value > high:
+            return high
+        return value
 
 # Ограничить число заданным интервалом. Нижняя граница может быть как меньше, так и больше верхней.
 def clamp_any(value: float, low: float, high: float) -> float:
