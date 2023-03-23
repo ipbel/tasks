@@ -21,10 +21,7 @@ def multiply_numbers(number: int, mupltiply: int):
 # Реализовать функцию, которая принимает произвольный набор параметров и возвращает кортеж, содержащий
 # типы переданных параметров.
 def type_of_value(*args) -> tuple:
-    a = []
-    for i in args:
-        a.append(type(i))
-    return a
+    return tuple(map(lambda x: type(x), args))
 
 
 # Реализовать функцию, которая принимает произвольный набор именованных параметров и возвращает их

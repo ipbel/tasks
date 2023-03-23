@@ -3,7 +3,7 @@
 Коллекции.
 Примечание: входные параметры ни в однй из задач не должны быть модифицированы.
 '''
-
+import copy
 from typing import Any, Dict, Iterable, List, Tuple
 
 
@@ -16,7 +16,7 @@ def build_list_from_args(*args) -> List:
 def build_int_list_from_args(*args) -> List[int]:
     int_list = []
     for i in args:
-        if type(i) == int:
+        if type(i) is int:
             int_list.append(i)
     return int_list
 
@@ -57,19 +57,17 @@ def build_list_from_list_args(*lists) -> List:
 
 # Сконструировать список из заданного элемента и значения длины (использовать умножение).
 def build_list_from_value_and_length(value: Any, length: int) -> List:
-    return [value for _ in range(length)]
-
+    return [copy.deepcopy(value)] * length
 
 # Удалить из списка заданный элемент.
 def remove_value_from_list(values: List, value_to_remove: Any) -> List:
-    values.remove(value_to_remove)
-    return values
+    return list(filter(lambda x: x != value_to_remove, values))
 
 
 # Удалить из списка заданный элемент, используя comprehension expression [... for .. in ...].
 def remove_value_from_list_using_comprehension(values: List, value_to_remove: Any) -> List:
-    new_list = [values.remove(value_to_remove) for i in values if i == value_to_remove]
-    return values
+    new_list = [i for i in values if i != value_to_remove]
+    return new_list
 
 
 # Удалить из списка заданный элемент, используя `filter` и lambda-функцию.
@@ -80,19 +78,13 @@ def remove_value_from_list_using_filter(values: List, value_to_remove: Any) -> L
 # Удалить из списка заданные элементы. Преобразовать `values_to_remove` в `set`.
 def remove_values_from_list(values: List, values_to_remove: Iterable) -> List:
     values_to_remove = set(values_to_remove)
-    values.remove(k for k in values_to_remove)
-    return values
+    new_list = [v for v in values if v not in values_to_remove]
+    return new_list
 
 
 # Удалить из списка заданные элементы. Преобразовать `values_to_remove` в `set`.
 def remove_values_from_list_using_comprehension(values: List, value_to_remove: Any) -> List:
-    values_to_remove = set(value_to_remove)
-    for d in values_to_remove:
-        for v in values:
-            if v == d:
-                values.remove(v)
-
-    return values
+    return [i for i in values if i not in set(value_to_remove)]
 
 
 # Удалить из списка заданные элементы. Преобразовать `values_to_remove` в `set`.
@@ -110,7 +102,7 @@ def remove_duplicates_from_list(values: List) -> List:
 def build_dict_from_named_arguments_of_type_int(**kwargs) -> Dict:
     result = {}
     for key, value in kwargs.items():
-        if type(value) == int:
+        if type(value) is int:
             result[key] = value
     return result
 
@@ -136,26 +128,18 @@ def build_dict_from_keys_and_default(values: Iterable, default: Any) -> Dict:
 # Создать и вернуть словарь, ключами которого являются индексы элементов,
 # а значениями - значения элементов iterable параметров (использовать enumerate и dict comprehension).
 def build_dict_from_indexed_values(values: Iterable) -> Dict:
-    new_dict = dict.fromkeys(values, ())
-    for i, x in enumerate(values):
-        new_dict[x] += (i,)
-    return new_dict
+    return {k: v for k, v in enumerate(values)}
 
 
 # Создать и вернуть словарь, собранный на основе списка пар ключ-значение.
 def build_dict_from_key_value_pairs(kws: List[Tuple]) -> Dict:
-    new_dict = {}
-    for i in kws:
-        new_dict[i[0]] = i[1]
-
-    return new_dict
+    return {i[0]: i[1] for i in kws}
 
 
 # Создать и вернуть словарь, собранный из двух списков, один из которых
 # содержит ключ, а второй - соответствующее значение (использовать zip).
 def build_dict_from_two_lists(keys: List, values: List) -> Dict:
-    result = {keys[i]: values[i] for i in range(len(keys))}
-    return result
+    return dict(zip(keys, values))
 
 
 # Сформировать из двух словарей и вернуть его. В случае, если ключи совпадают,
@@ -168,15 +152,15 @@ def build_dict_using_update(first: Dict, second: Dict) -> Dict:
 # Обновить словарь (и вернуть его), используя значения именованных аргументов.
 # Заменить значение в случае совпадения ключей.
 def update_dict_using_kwargs(dictionary: Dict, **kwargs) -> Dict:
-    for k, v in kwargs.items():
-        dictionary[k] = v
-    return dictionary
+    new_dict = copy.copy(dictionary)
+    new_dict.update(kwargs)
+    return new_dict
 
 # Обновить словарь (и вернуть его), используя значения именованных аргументов.
 # Объединить значения в список в случае совпадения ключей.
 def update_and_merge_dict_using_kwargs(dictionary: Dict, **kwargs) -> Dict:
     for k, v in kwargs.items():
-        if dictionary.get(k):
+        if k in dictionary:
             dictionary[k] = [dictionary[k], v]
         else:
             dictionary[k] = v
@@ -186,12 +170,13 @@ def update_and_merge_dict_using_kwargs(dictionary: Dict, **kwargs) -> Dict:
 # Объединить два словарь и вернуть результат.
 # Объединить значения в список в случае совпадения ключей.
 def merge_two_dicts(first: Dict, second: Dict) -> Dict:
+    first_dict = copy.copy(first)
     for k, v in second.items():
-        if first.get(k):
-            first[k] = [first[k], v]
+        if k in first:
+            first_dict[k] = [first_dict[k], v]
         else:
-            first[k] = v
-    return first
+            first_dict[k] = v
+    return first_dict
 
 
 # Объединить два словарь и вернуть результат.
@@ -251,28 +236,23 @@ def clear_dummy_elements(dictionary: Dict) -> Dict:
 def clear_dummy_and_duplicate_elements(dictionary: Dict) -> Dict:
     res = {}
     for k, v in list(dictionary.items()):
-        if v in (None, '', [], {}):
-            del dictionary[k]
-        elif v not in res.values():
-            res.update({k:v})
+        if (v not in (None, '', [], {})) and (v not in res.values()):
+            res.update({k: v})
     return res
 
 
 # Обменять в словаре клчи и значения (в качестве значений могут выступать только неизменяемые значения).
 def swap_dict_keys_and_values(dictionary: Dict) -> Dict:
-    res = {v:k for k,v in dictionary.items()}
-    return res
+    return {v:k for k,v in dictionary.items()}
 
 
 # Вернуть словарь, отсортированный по ключу. Ключи могут иметь только тип int.
 def sort_dict_with_int_keys(dictionary: Dict) -> Dict:
-    dictionary = dict(sorted(dictionary.items()))
-    return dictionary
+    return dict(sorted(dictionary.items()))
 
 # Вернуть словарь, отсортированный по ключу в обратном порядке. Ключи могут иметь только тип int.
 def sort_dict_backward_with_int_keys(dictionary: Dict) -> Dict:
-    dictionary = dict(sorted(dictionary.items(), reverse=True))
-    return dictionary
+    return dict(sorted(dictionary.items(), reverse=True))
 
 
 # Вернуть словарь, элементы которого сгруппированы по типу ключа.
@@ -318,11 +298,7 @@ def group_dict_elements_by_key_type_and_sort(dictionary: Dict) -> Dict:
 # Подсчитать количество элементов словаря, имеющих числовой тип, значение которых находится
 # в интервале [-10, 25].
 def count_dict_elements(dictionary: Dict):
-    counter = 0
-
-    for k, v in list(dictionary.items()):
-        if isinstance(v, Number) and -10 <= v <= 25:
-            counter += 1
+    counter = sum(1 for k, v in list(dictionary.items()) if isinstance(v, Number) and -10 <= v <= 25)
     return counter
 
 # Построить и возвратить словарь из двух списков. Количество ключей может превышать
