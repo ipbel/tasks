@@ -25,185 +25,151 @@
 
 
 class LengthUnits:
-    def __init__(self, value, convert, default_union, default_num=1):
-        self.value = value
-        self.convert = convert
-        self.default_union = default_union
-        self.default_num = default_num
+    UNITS = 'm'
+    SCALE = 1.0
+
+    def __init__(self, value):
+        self.value = value * self.SCALE
+
+    def __str__(self):
+        return f'{self.value / self.SCALE} {self.UNITS}'
 
     def __eq__(self, other):
-        return self.default_num == other.default_num
+        return self.value == other.value
 
     def __lt__(self, other):
-        return self.default_num < other.default_num
+        return self.value < other.value
 
     def __add__(self, other):
         if type(other) in {float, int}:
-            return f'{self.value.__add__(other)} {self.default_union}'
-        return f'{self.default_num.__add__(other.default_num)} м'
+            return type(self)(self.value + other / self.SCALE)
+        return type(self)(self.value + other.value)
 
     def __iadd__(self, other):
         if type(other) in {float, int}:
-            self.value += other
-            return f'{self.value} {self.default_union}'
-        else:
-            self.default_num += other.default_num
-            return f'{self.default_num} м'
+            self.value += other / self.SCALE
+        self.value += other.value
+        return self
 
     def __sub__(self, other):
         if type(other) in {float, int}:
-            return f'{self.value.__sub__(other)} {self.default_union}'
-        return f'{self.default_num.__sub__(other.default_num)} м'
+            return type(self)(self.value - other / self.SCALE)
+        return type(self)(self.value - other.value)
 
     def __isub__(self, other):
         if type(other) in {float, int}:
-            self.value -= other
-            return f'{self.value} {self.default_union}'
-        else:
-            self.default_num -= other.default_num
-            return f'{self.default_num} м'
+            self.value -= other / self.SCALE
+        self.value -= other.value
+        return self
 
     def __mul__(self, other):
         if isinstance(other, (int, float)):
-            return f'{self.value.__mul__(other)} {self.default_union}'
-        raise TypeError('Takes only number of arguments')
+            return type(self)(self.value * other / self.SCALE)
+        return type(self)(self.value * other.value)
 
     def __imul__(self, other):
         if isinstance(other, (int, float)):
-            self.value *= other
-            return f'{self.value} {self.default_union}'
-        raise TypeError('Takes only number of arguments')
+            self.value *= other / self.SCALE
+        self.value *= other.value
+        return self
 
     # Нашел что в py3 вместо __div__ есть __floordiv__(//) деление без остатка
     def __floordiv__(self, other):
         if type(other) in {float, int}:
-            return f'{self.value.__floordiv__(other)} {self.default_union}'
-        return f'{self.default_num.__floordiv__(other.default_num)} м'
+            return type(self)(self.value / other / self.SCALE)
+        return type(self)(self.value / other.value)
 
     def __idiv__(self, other):
         if type(other) in {float, int}:
-            self.value /= other
-            return f'{self.value} {self.default_union}'
-        else:
-            self.default_num /= other.default_num
-            return f'{self.default_num} м'
+            self.value /= other / self.SCALE
+        self.value /= other.value
+        return self
 
 
 class Millimeters(LengthUnits):
+    UNITS = 'mm'
+    SCALE = 1000.0
 
-    def __init__(self, default_num, convert=1000):
-        super(Millimeters, self).__init__(default_num, convert, default_union='мм')
-        self.default_num = self.value / convert
-        self.convert = convert
-
-    def __str__(self):
-        return f'{self.value} {self.default_union}'
+    def __init__(self, value):
+        super(Millimeters, self).__init__(value)
 
 
 class Centimeters(LengthUnits):
-    def __init__(self, default_num, convert=100):
-        super(Centimeters, self).__init__(default_num, convert, default_union='cm')
-        self.default_num = self.value / convert
-        self.convert = convert
+    UNITS = 'cm'
+    SCALE = 100.0
 
-    def __str__(self):
-        return f'{self.value} {self.default_union}'
+    def __init__(self, value):
+        super(Centimeters, self).__init__(value)
 
 
 class Meters(LengthUnits):
-    def __init__(self, default_num, convert=1):
-        super(Meters, self).__init__(default_num, convert, default_union='м')
-        self.default_num = self.value / convert
-        self.convert = convert
+    UNITS = 'm'
+    SCALE = 1.0
 
-    def __str__(self):
-        return f'{self.value} {self.default_union}'
+    def __init__(self, value):
+        super(Meters, self).__init__(value)
 
 
 class Kilometers(LengthUnits):
+    UNITS = 'km'
+    SCALE = 0.001
 
-    def __init__(self, default_num, convert=0.001):
-        super(Kilometers, self).__init__(default_num, convert, default_union='km')
-        self.default_num = self.value / convert
-        self.convert = convert
-
-    def __str__(self):
-        return f'{self.value} {self.default_union}'
+    def __init__(self, value):
+        super(Kilometers, self).__init__(value)
 
 
 class Inches(LengthUnits):
+    UNITS = 'ich'
+    SCALE = 39.37
 
-    def __init__(self, default_num, convert=39.37):
-        super(Inches, self).__init__(default_num, convert, default_union='inc')
-        self.default_num = self.value / convert
-        self.convert = convert
-
-    def __str__(self):
-        return f'{self.value} {self.default_union}'
+    def __init__(self, value):
+        super(Inches, self).__init__(value)
 
 
 #
 class Feets(LengthUnits):
+    UNITS = 'fe'
+    SCALE = 3.28
 
-    def __init__(self, default_num, convert=3.28):
-        super(Feets, self).__init__(default_num, convert, default_union='feets')
-        self.default_num = self.value / convert
-        self.convert = convert
-
-    def __str__(self):
-        return f'{self.value} {self.default_union}'
+    def __init__(self, value):
+        super(Feets, self).__init__(value)
 
 
 class Yards(LengthUnits):
+    UNITS = 'ya'
+    SCALE = 1.09
 
-    def __init__(self, default_num, convert=1.09):
-        super(Yards, self).__init__(default_num, convert, default_union='ya')
-        self.default_num = self.value / convert
-        self.convert = convert
-
-    def __str__(self):
-        return f'{self.value} {self.default_union}'
+    def __init__(self, value):
+        super(Yards, self).__init__(value)
 
 
 class Miles(LengthUnits):
+    UNITS = 'mil'
+    SCALE = 0.00062
 
-    def __init__(self, default_num, convert=0.00062):
-        super(Miles, self).__init__(default_num, convert, default_union='mi')
-        self.default_num = self.value / convert
-        self.convert = convert
-
-    def __str__(self):
-        return f'{self.value} {self.default_union}'
+    def __init__(self, value):
+        super(Miles, self).__init__(value)
 
 
 class Fen(LengthUnits):
+    UNITS = 'fen'
+    SCALE = 269.179004
 
-    def __init__(self, default_num, convert=269.179004):
-        super(Fen, self).__init__(default_num, convert, default_union='fen')
-        self.default_num = self.value / convert
-        self.convert = convert
-
-    def __str__(self):
-        return f'{self.value} {self.default_union}'
+    def __init__(self, value):
+        super(Fen, self).__init__(value)
 
 
 class Chi(LengthUnits):
+    UNITS = 'chi'
+    SCALE = 3.0003
 
-    def __init__(self, default_num, convert=3.0003):
-        super(Chi, self).__init__(default_num, convert, default_union='chi')
-        self.default_num = self.value / convert
-        self.convert = convert
-
-    def __str__(self):
-        return f'{self.value} {self.default_union}'
+    def __init__(self, value):
+        super(Chi, self).__init__(value)
 
 
 class In(LengthUnits):
+    UNITS = 'in'
+    SCALE = 0.03125
 
-    def __init__(self, default_num, convert=0.03125):
-        super(In, self).__init__(default_num, convert, default_union='in')
-        self.default_num = self.value / convert
-        self.convert = convert
-
-    def __str__(self):
-        return f'{self.value} {self.default_union}'
+    def __init__(self, value):
+        super(In, self).__init__(value)
